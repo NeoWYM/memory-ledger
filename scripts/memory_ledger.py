@@ -249,9 +249,10 @@ def parse_frontmatter(path: str) -> Optional[Dict[str, object]]:
         # Any other key ends the list block, so a stray item cannot attach to a
         # header several fields above it.
         list_key = None
-        value = unquote(value)
+        # Decide presence on the raw text so `status: ""` is kept (and flagged as
+        # invalid) instead of silently dropping the key.
         if value:
-            fm[key] = value
+            fm[key] = unquote(value)
     return fm
 
 

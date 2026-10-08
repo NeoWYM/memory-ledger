@@ -93,6 +93,11 @@ class QuotingTests(FixtureCase):
         self.assertEqual(code, 1)
         self.assertIn("status: open", err)
 
+    def test_empty_quoted_status_is_flagged(self) -> None:
+        """`status: ""` must not silently drop the project from the dashboard."""
+        self.add(SERIALIZED.replace("status: observing", 'status: ""'))
+        self.assertEqual(run_cli(["validate", "--memory-dir", self.mem])[0], 1)
+
     def test_quoted_type(self) -> None:
         """`type: "project"` still marks a project."""
         path = self.add(SERIALIZED.replace("type: project", 'type: "project"'))
