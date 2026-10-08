@@ -103,7 +103,7 @@ Tests use a synthetic memory directory under `tests/fixtures` and golden dashboa
 ## Limitations
 
 - It depends on Claude Code's auto-memory file format: markdown files with a leading `---` frontmatter block and `metadata:`-nested fields. If that format changes, the parser may need updating.
-- The frontmatter parser is intentionally small, not a YAML parser. It reads flat `key: value` lines plus the two list fields; a list item with no indentation would be ignored, so the validator reports it as a finding.
+- The frontmatter parser is intentionally small, not a YAML parser. It reads flat `key: value` lines plus the two list fields. It strips one matching pair of surrounding quotes from scalar values and list items (double quotes: `\"` and `\\` are unescaped, other escapes stay literal; single quotes: `''` becomes `'`), which is how Claude Code's memory writer may re-serialize them; unbalanced quotes are left as written. Block scalars (`|`, `>`), flow lists with items and multi-line values are not supported; a list item with no indentation would be ignored, so the validator reports it as a finding.
 - Index link detection expects links shaped like `(name.md)` using word characters, hyphens and slashes.
 - The hook only sees edits made through the Write, Edit and MultiEdit tools, not edits made by shell commands.
 - A `project_*.md` file without `type: project` frontmatter is invisible to the dashboard and to every per-file check. The unscoped `validate` and the regenerate warnings list such files; the hook ignores them.

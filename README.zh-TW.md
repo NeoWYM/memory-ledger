@@ -103,7 +103,7 @@ claude plugin validate .
 ## 限制
 
 - 依賴 Claude Code auto-memory 的檔案格式：以 `---` 開頭的 frontmatter 區塊，且欄位巢狀在 `metadata:` 底下。若該格式改變，解析器可能需要更新。
-- frontmatter 解析器刻意做得很小，不是完整的 YAML 解析器。它只讀扁平的 `key: value` 行與兩個清單欄位；沒有縮排的清單項目會被忽略，因此驗證器會把它回報為問題。
+- frontmatter 解析器刻意做得很小，不是完整的 YAML 解析器。它只讀扁平的 `key: value` 行與兩個清單欄位。它會去掉純量值與清單項目外層成對的引號（雙引號內的 `\"` 與 `\\` 會還原，其他跳脫字元維持原樣；單引號內的 `''` 還原為 `'`），這是 Claude Code 寫入 memory 時可能重新序列化的形式；引號不成對則保持原樣。區塊純量（`|`、`>`）、帶項目的行內清單與多行值不支援；沒有縮排的清單項目會被忽略，因此驗證器會把它回報為問題。
 - 索引連結偵測只認 `(name.md)` 形式，名稱限英數字、底線、連字號與斜線。
 - Hook 只看得到 Write、Edit、MultiEdit 工具的編輯，看不到透過 shell 指令做的修改。
 - 缺少 `type: project` frontmatter 的 `project_*.md` 檔，dashboard 與所有逐檔檢查都看不到它。不帶檔名的 `validate` 與重新產生時的警告會列出這類檔案；hook 則直接忽略。

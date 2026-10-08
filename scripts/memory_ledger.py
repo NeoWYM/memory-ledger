@@ -57,6 +57,7 @@ NON_INDEXED_FILES = {"MEMORY.md", "dashboard.md", "archive_index.md"}
 # An unindented list item, which the parser would silently drop.
 ZERO_INDENT_ITEM_RE = re.compile(r"^-\s+\S")
 
+DOUBLE_ESCAPE_RE = re.compile(r'\\(["\\])')
 COMMENT_RE = re.compile(r"(^|\s)#.*$")
 EMPTY_FLOW_LIST_RE = re.compile(r"^\[\s*\]$")
 
@@ -187,6 +188,24 @@ def format_overdue(strings: Dict[str, str], days: int) -> str:
     return strings["overdue"].format(days=days, unit="day" if days == 1 else "days")
 
 
+def unquote(value: str) -> str:
+    """Strip one matching pair of surrounding YAML quotes.
+
+    Double-quoted values unescape `\\"` and `\\\\` (other escapes stay literal);
+    single-quoted values unescape `''`. Unbalanced quotes, or a closing quote
+    that is itself escaped, leave the value untouched.
+    """
+    if len(value) < 2 or value[0] != value[-1] or value[0] not in "\"'":
+        return value
+    inner = value[1:-1]
+    if value[0] == "'":
+        return inner.replace("''", "'")
+    trailing = len(inner) - len(inner.rstrip("\\"))
+    if trailing % 2:  # the closing quote was escaped, so the string is unterminated
+        return value
+    return DOUBLE_ESCAPE_RE.sub(r"\1", inner)
+
+
 def parse_frontmatter(path: str) -> Optional[Dict[str, object]]:
     """Parse the leading `---` block of a markdown file.
 
@@ -210,7 +229,9 @@ def parse_frontmatter(path: str) -> Optional[Dict[str, object]]:
         # KV_RE because "- date: x" would otherwise match neither and be lost.
         item = LIST_ITEM_RE.match(line)
         if list_key and item and item.group(1).strip():
-            fm[list_key].append(item.group(1).strip())  # type: ignore[union-attr]
+            text = unquote(item.group(1).strip())
+            if text:
+                fm[list_key].append(text)  # type: ignore[union-attr]
             continue
 
         match = KV_RE.match(line)
@@ -228,9 +249,8 @@ def parse_frontmatter(path: str) -> Optional[Dict[str, object]]:
         # Any other key ends the list block, so a stray item cannot attach to a
         # header several fields above it.
         list_key = None
+        value = unquote(value)
         if value:
-            if len(value) >= 2 and value[0] == value[-1] and value[0] in "\"'":
-                value = value[1:-1]
             fm[key] = value
     return fm
 
