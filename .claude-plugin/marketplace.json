@@ -1,0 +1,16 @@
+{
+  "name": "memory-ledger",
+  "owner": {
+    "name": "NeoWYM"
+  },
+  "metadata": {
+    "description": "Marketplace for the memory-ledger Claude Code plugin."
+  },
+  "plugins": [
+    {
+      "name": "memory-ledger",
+      "source": "./",
+      "description": "Dashboard, validator and hook for Claude Code auto-memory project tracking."
+    }
+  ]
+}

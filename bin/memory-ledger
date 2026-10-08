@@ -1,0 +1,10 @@
+#!/bin/sh
+# Thin wrapper: run scripts/memory_ledger.py relative to this file's real location.
+self=$0
+target=$(readlink -f "$self" 2>/dev/null)
+if [ -z "$target" ]; then
+    # readlink -f is missing on older macOS; fall back to Python's realpath.
+    target=$(python3 -c 'import os, sys; print(os.path.realpath(sys.argv[1]))' "$self")
+fi
+here=$(cd "$(dirname "$target")" && pwd)
+exec python3 "$here/../scripts/memory_ledger.py" "$@"

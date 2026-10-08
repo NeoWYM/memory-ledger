@@ -1,0 +1,10 @@
+{
+  "name": "memory-ledger",
+  "version": "0.1.0",
+  "description": "Turn Claude Code auto-memory into a tracked ledger: a generated dashboard of active, observing and todo projects, a frontmatter validator, and a PostToolUse hook that catches bad status values at write time.",
+  "author": {
+    "name": "Ming Wu"
+  },
+  "repository": "https://github.com/NeoWYM/memory-ledger",
+  "license": "MIT"
+}
